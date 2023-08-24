@@ -1,0 +1,30 @@
+[package]
+name = "mircomp"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+description = "Rust wrapper around Vladimir Makarov's MIR"
+categories = ["external-ffi-bindings", "compilers"]
+keywords = ["compilers", "ffi", "jit"]
+homepage = "https://github.com/vnmakarov/mir"
+repository = "https://github.com/jerome-trc/mir-rs"
+resolver = "2"
+publish = false
+
+[dependencies]
+sys = { package = "mircomp-sys", path = "./sys" }
+
+[profile.release]
+strip = true
+opt-level = 3
+# TODO: `lto = true` later.
+codegen-units = 4
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.bench]
+debug = true
+strip = false
+
+[workspace]

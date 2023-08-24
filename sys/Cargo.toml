@@ -1,0 +1,17 @@
+[package]
+name = "mircomp-sys"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+description = "Generated FFI bindings to Vladimir Makarov's MIR"
+categories = ["external-ffi-bindings", "compilers"]
+keywords = ["compilers", "ffi", "jit"]
+homepage = "https://github.com/vnmakarov/mir"
+repository = "https://github.com/jerome-trc/mir-rs"
+resolver = "2"
+publish = false
+
+[build-dependencies]
+bindgen = "0.66.1"
+cc = { version = "1.0.83", features = ["parallel"] }
+miette = { version = "5.10.0", features = ["fancy"] }
