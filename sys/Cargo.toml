@@ -11,6 +11,10 @@ repository = "https://github.com/jerome-trc/mir-rs"
 resolver = "2"
 publish = false
 
+[features]
+default = []
+parallel = []
+
 [build-dependencies]
 bindgen = "0.66.1"
 cc = { version = "1.0.83", features = ["parallel"] }
