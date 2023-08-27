@@ -41,6 +41,16 @@ fn main() -> miette::Result<(), Box<dyn std::error::Error>> {
 		.header(path_string(repo_path.join("mir.h")))
 		.header(path_string(repo_path.join("mir-gen.h")))
 		.header(path_string(repo_path.join("c2mir/c2mir.h")))
+		.allowlist_function("_MIR_.+")
+		.allowlist_function("MIR_.+")
+		.allowlist_function("c2mir_.+")
+		.allowlist_type("MIR_.+")
+		.allowlist_type("_MIR_.+")
+		.allowlist_type("c2mir_.+")
+		.allowlist_var("MIR_.+")
+		.allowlist_var("_MIR_.+")
+		.allowlist_var("c2mir_.+")
+		.allowlist_var("std(err|out)")
 		.parse_callbacks(Box::new(bindgen::CargoCallbacks))
 		.generate()?
 		.write_to_file(PathBuf::from(std::env::var("OUT_DIR")?).join("bindings.rs"))?;
