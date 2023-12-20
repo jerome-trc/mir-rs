@@ -34,6 +34,15 @@ impl Context {
 		}
 	}
 
+	/// Panics if `generator` is out of the range of the initialized generators.
+	pub fn set_optimization(&self, generator: u32, level: Optimization) {
+		assert!(self.gen_count > generator);
+
+		unsafe {
+			sys::MIR_gen_set_optimize_level(self.inner, generator as i32, level as u32);
+		}
+	}
+
 	/// How many code generators was this context initialized with?
 	#[must_use]
 	pub fn generator_count(&self) -> u32 {
@@ -101,6 +110,24 @@ impl DataType {
 	pub fn is_float(self) -> bool {
 		matches!(self, Self::Float | Self::Double | Self::LongDouble)
 	}
+}
+
+/// How much should each generator trade compile performance for runtime performance?
+#[repr(u32)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Optimization {
+	/// Only perform register allocation and machine code generation.
+	None,
+	/// More compact and faster code than [`Optimization::None`],
+	/// at practically the same compilation speed.
+	L1,
+	/// Additional common sub-expression elimination and sparse conditional
+	/// constant propagation. Note that this is the default.
+	#[default]
+	L2,
+	/// Additional register renaming and loop-invariant code motion.
+	/// [`Optimization::L2`] is about 50% faster than this.
+	L3,
 }
 
 #[cfg(test)]
