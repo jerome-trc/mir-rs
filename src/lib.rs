@@ -21,8 +21,12 @@ impl Context {
 	/// - if the `parallel` feature flag is disabled,
 	/// `generators` will always be set to 1.
 	/// - `generators` is zero, it will be silently set to 1.
+	/// - MIR accepts a C `int`, so this will panic if `generators` is greater
+	/// than or equal to `i32::MAX`.
 	#[must_use]
 	pub fn new(generators: u32) -> Self {
+		assert!(generators < (std::ffi::c_int::MAX as u32));
+
 		unsafe {
 			let inner = sys::_MIR_init();
 			sys::MIR_gen_init(inner, generators as i32);
