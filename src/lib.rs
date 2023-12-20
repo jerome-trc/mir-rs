@@ -52,6 +52,55 @@ unsafe impl Send for Context {}
 #[cfg(feature = "parallel")]
 unsafe impl Sync for Context {}
 
+#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DataType {
+	I8 = sys::MIR_type_t_MIR_T_I8,
+	U8 = sys::MIR_type_t_MIR_T_U8,
+	I16 = sys::MIR_type_t_MIR_T_I16,
+	U16 = sys::MIR_type_t_MIR_T_U16,
+	I32 = sys::MIR_type_t_MIR_T_I32,
+	U32 = sys::MIR_type_t_MIR_T_U32,
+	I64 = sys::MIR_type_t_MIR_T_I64,
+	U64 = sys::MIR_type_t_MIR_T_U64,
+
+	Float = sys::MIR_type_t_MIR_T_F,
+	Double = sys::MIR_type_t_MIR_T_D,
+	/// Machine-dependent; can be an IEEE double, x864 80-bit floating-point or
+	/// IEEE quad-precision floating-point values.
+	LongDouble = sys::MIR_type_t_MIR_T_LD,
+
+	Pointer = sys::MIR_type_t_MIR_T_P,
+
+	Block = sys::MIR_type_t_MIR_T_BLK,
+	/// Return block data, only usable for function arguments.
+	RBlock = sys::MIR_type_t_MIR_T_RBLK,
+}
+
+impl DataType {
+	/// Note that this returns `true` for [`DataType::Pointer`].
+	#[must_use]
+	pub fn is_integer(self) -> bool {
+		matches!(
+			self,
+			Self::I8
+				| Self::U8 | Self::I16
+				| Self::U16 | Self::I32
+				| Self::U32 | Self::I64
+				| Self::U64 | Self::Pointer
+		)
+	}
+
+	/// Checks if this is one of the following:
+	/// - [`DataType::Float`]
+	/// - [`DataType::Double`]
+	/// - [`DataType::LongDouble`]
+	#[must_use]
+	pub fn is_float(self) -> bool {
+		matches!(self, Self::Float | Self::Double | Self::LongDouble)
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
