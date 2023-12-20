@@ -7,6 +7,8 @@
 //! [Vladimir Makarov's MIR toolchain]: https://github.com/vnmakarov/mir
 //! [Mid-level IR]: https://rustc-dev-guide.rust-lang.org/mir/index.html
 
+pub extern crate sys;
+
 /// Fully re-entrant state implicit to any usage of the MIR toolchain.
 #[derive(Debug)]
 pub struct Context {
