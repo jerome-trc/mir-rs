@@ -6,6 +6,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(improper_ctypes)] // `u128`
+#![allow(clippy::useless_transmute)]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
