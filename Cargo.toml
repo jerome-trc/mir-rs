@@ -11,6 +11,10 @@ repository = "https://github.com/jerome-trc/mir-rs"
 resolver = "2"
 publish = false
 
+[features]
+default = []
+parallel = ["sys/parallel"]
+
 [dependencies]
 sys = { package = "mircomp-sys", path = "./sys" }
 
