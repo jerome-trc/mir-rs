@@ -7,12 +7,16 @@
 //! [Vladimir Makarov's MIR toolchain]: https://github.com/vnmakarov/mir
 //! [Mid-level IR]: https://rustc-dev-guide.rust-lang.org/mir/index.html
 
+use std::ptr::NonNull;
+
+use sys::MIR_context;
+
 pub extern crate sys;
 
 /// Fully re-entrant state implicit to any usage of the MIR toolchain.
 #[derive(Debug)]
 pub struct Context {
-	inner: sys::MIR_context_t,
+	inner: NonNull<sys::MIR_context>,
 	gen_count: u32,
 }
 
@@ -32,7 +36,7 @@ impl Context {
 			sys::MIR_gen_init(inner, generators as i32);
 
 			Self {
-				inner,
+				inner: NonNull::new(inner).unwrap(),
 				gen_count: generators,
 			}
 		}
@@ -43,7 +47,7 @@ impl Context {
 		assert!(self.gen_count > generator);
 
 		unsafe {
-			sys::MIR_gen_set_optimize_level(self.inner, generator as i32, level as u32);
+			sys::MIR_gen_set_optimize_level(self.inner.as_ptr(), generator as i32, level as u32);
 		}
 	}
 
@@ -52,12 +56,17 @@ impl Context {
 	pub fn generator_count(&self) -> u32 {
 		self.gen_count
 	}
+
+	#[must_use]
+	pub fn raw(&self) -> NonNull<MIR_context> {
+		self.inner
+	}
 }
 
 impl Drop for Context {
 	fn drop(&mut self) {
 		unsafe {
-			sys::MIR_finish(self.inner);
+			sys::MIR_finish(self.inner.as_ptr());
 		}
 	}
 }
