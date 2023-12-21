@@ -7,59 +7,43 @@
 //! [Vladimir Makarov's MIR toolchain]: https://github.com/vnmakarov/mir
 //! [Mid-level IR]: https://rustc-dev-guide.rust-lang.org/mir/index.html
 
-use std::ptr::NonNull;
-
-use sys::MIR_context;
-
 pub extern crate sys;
+
+use std::{ffi::c_int, ptr::NonNull};
 
 /// Fully re-entrant state implicit to any usage of the MIR toolchain.
 #[derive(Debug)]
 pub struct Context {
 	inner: NonNull<sys::MIR_context>,
-	gen_count: u32,
 }
 
 impl Context {
 	/// Note that MIR forces the following:
-	/// - if the `parallel` feature flag is disabled,
-	/// `generators` will always be set to 1.
-	/// - `generators` is zero, it will be silently set to 1.
-	/// - MIR accepts a C `int`, so this will panic if `generators` is greater
-	/// than or equal to `i32::MAX`.
+	/// - if `count` is zero, it will be silently set to 1.
+	/// - MIR accepts a C `int`, so this will panic if `count` is greater
+	/// than or equal to `c_int::MAX`.
 	#[must_use]
-	pub fn new(generators: u32) -> Self {
-		assert!(generators < (std::ffi::c_int::MAX as u32));
-
+	pub fn generators(&mut self, count: u32) -> Generators {
 		unsafe {
-			let inner = sys::_MIR_init();
-			sys::MIR_gen_init(inner, generators as i32);
+			assert!(count < (c_int::MAX as u32));
+			sys::MIR_gen_init(self.inner.as_ptr(), count as c_int);
+			Generators { ctx: self, count }
+		}
+	}
 
+	#[must_use]
+	pub fn raw(&self) -> NonNull<sys::MIR_context> {
+		self.inner
+	}
+}
+
+impl Default for Context {
+	fn default() -> Self {
+		unsafe {
 			Self {
-				inner: NonNull::new(inner).unwrap(),
-				gen_count: generators,
+				inner: NonNull::new(sys::_MIR_init()).unwrap(),
 			}
 		}
-	}
-
-	/// Panics if `generator` is out of the range of the initialized generators.
-	pub fn set_optimization(&self, generator: u32, level: Optimization) {
-		assert!(self.gen_count > generator);
-
-		unsafe {
-			sys::MIR_gen_set_optimize_level(self.inner.as_ptr(), generator as i32, level as u32);
-		}
-	}
-
-	/// How many code generators was this context initialized with?
-	#[must_use]
-	pub fn generator_count(&self) -> u32 {
-		self.gen_count
-	}
-
-	#[must_use]
-	pub fn raw(&self) -> NonNull<MIR_context> {
-		self.inner
 	}
 }
 
@@ -72,9 +56,49 @@ impl Drop for Context {
 }
 
 unsafe impl Send for Context {}
-
-#[cfg(feature = "parallel")]
 unsafe impl Sync for Context {}
+
+#[derive(Debug)]
+pub struct Generators<'ctx> {
+	ctx: &'ctx mut Context,
+	count: u32,
+}
+
+impl Generators<'_> {
+	#[must_use]
+	pub fn context(&self) -> &Context {
+		self.ctx
+	}
+
+	#[must_use]
+	pub fn count(&self) -> u32 {
+		self.count
+	}
+
+	/// Panics if `generator` is out of the range of the initialized generators.
+	pub fn set_optimization(&mut self, generator: u32, level: Optimization) {
+		assert!(self.count > generator);
+
+		unsafe {
+			sys::MIR_gen_set_optimize_level(
+				self.ctx.inner.as_ptr(),
+				generator as i32,
+				level as u32,
+			);
+		}
+	}
+}
+
+impl Drop for Generators<'_> {
+	fn drop(&mut self) {
+		unsafe {
+			sys::MIR_gen_finish(self.ctx.inner.as_ptr());
+		}
+	}
+}
+
+unsafe impl Send for Generators<'_> {}
+unsafe impl Sync for Generators<'_> {}
 
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -149,6 +173,6 @@ mod test {
 
 	#[test]
 	fn context_smoke() {
-		let _ = Context::new(1);
+		let _ = Context::default();
 	}
 }
