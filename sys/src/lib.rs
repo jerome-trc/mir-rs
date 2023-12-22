@@ -1,4 +1,4 @@
-//! # mircomp-sys
+//! # mirjit-sys
 //!
 //! Auto-generated FFI bindings to [Vladimir Makarov's MIR](https://github.com/vnmakarov/mir) toolchain.
 

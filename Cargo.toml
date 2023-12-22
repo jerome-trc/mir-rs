@@ -1,5 +1,5 @@
 [package]
-name = "mircomp"
+name = "mirjit"
 version = "0.0.0"
 edition = "2021"
 license = "MIT"
@@ -15,7 +15,7 @@ publish = false
 default = []
 
 [dependencies]
-sys = { package = "mircomp-sys", path = "./sys" }
+sys = { package = "mirjit-sys", path = "./sys" }
 
 [profile.release]
 strip = true
