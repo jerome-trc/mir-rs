@@ -15,9 +15,23 @@ use std::{ffi::c_int, ptr::NonNull};
 #[derive(Debug)]
 pub struct Context {
 	inner: NonNull<sys::MIR_context>,
+	c2mir: bool,
 }
 
 impl Context {
+	#[must_use]
+	pub fn new(c2mir: bool) -> Self {
+		unsafe {
+			let inner = NonNull::new(sys::_MIR_init()).unwrap();
+
+			if c2mir {
+				sys::c2mir_init(inner.as_ptr());
+			}
+
+			Self { inner, c2mir }
+		}
+	}
+
 	/// Note that MIR forces the following:
 	/// - if `count` is zero, it will be silently set to 1.
 	/// - MIR accepts a C `int`, so this will panic if `count` is greater
@@ -37,19 +51,13 @@ impl Context {
 	}
 }
 
-impl Default for Context {
-	fn default() -> Self {
-		unsafe {
-			Self {
-				inner: NonNull::new(sys::_MIR_init()).unwrap(),
-			}
-		}
-	}
-}
-
 impl Drop for Context {
 	fn drop(&mut self) {
 		unsafe {
+			if self.c2mir {
+				sys::c2mir_finish(self.inner.as_ptr());
+			}
+
 			sys::MIR_finish(self.inner.as_ptr());
 		}
 	}
@@ -173,6 +181,6 @@ mod test {
 
 	#[test]
 	fn context_smoke() {
-		let _ = Context::default();
+		let _ = Context::new(true);
 	}
 }
