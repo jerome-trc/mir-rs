@@ -51,7 +51,7 @@ fn main() -> miette::Result<(), Box<dyn std::error::Error>> {
 		.allowlist_var("_MIR_.+")
 		.allowlist_var("c2mir_.+")
 		.allowlist_var("std(err|out)")
-		.parse_callbacks(Box::new(bindgen::CargoCallbacks))
+		.parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
 		.generate()?
 		.write_to_file(PathBuf::from(std::env::var("OUT_DIR")?).join("bindings.rs"))?;
 

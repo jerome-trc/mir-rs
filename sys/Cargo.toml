@@ -16,6 +16,6 @@ default = []
 parallel = []
 
 [build-dependencies]
-bindgen = "0.66.1"
+bindgen = "0.69.1"
 cc = { version = "1.0.83", features = ["parallel"] }
 miette = { version = "5.10.0", features = ["fancy"] }
