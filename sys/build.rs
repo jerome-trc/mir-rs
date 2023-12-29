@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-fn main() -> miette::Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let repo_path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "mir"].iter().collect();
 
 	if !repo_path.exists() {
