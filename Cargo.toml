@@ -1,3 +1,18 @@
+[workspace]
+
+[profile.release]
+strip = true
+opt-level = 3
+# TODO: `lto = true` later.
+codegen-units = 4
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.bench]
+debug = true
+strip = false
+
 [package]
 name = "mirjit"
 version = "0.0.0"
@@ -17,17 +32,9 @@ default = []
 [dependencies]
 sys = { package = "mirjit-sys", path = "./sys" }
 
-[profile.release]
-strip = true
-opt-level = 3
-# TODO: `lto = true` later.
-codegen-units = 4
+[[bench]]
+name = "bench"
+harness = false
 
-[profile.dev.package."*"]
-opt-level = 3
-
-[profile.bench]
-debug = true
-strip = false
-
-[workspace]
+[dev-dependencies]
+divan = "0.1.8"
