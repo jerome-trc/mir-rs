@@ -28,7 +28,6 @@ Session.vim
 # https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
 /Cargo.lock
 
-/temp
 /sys/mir
 
 # Generated rustdoc
